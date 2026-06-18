@@ -34,7 +34,7 @@ class MyRobotRewards(RewardsCfg):
         weight=0.25,
         params={
             "command_name": "base_velocity",
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_pitch_link"),  # 修改：你的脚板链接名
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_pitch_link"),
             "threshold": 0.3,
         },
     )
@@ -42,8 +42,16 @@ class MyRobotRewards(RewardsCfg):
         func=mdp.feet_slide,
         weight=-0.1,
         params={
-            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_pitch_link"),  # 修改
-            "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_pitch_link"),  # 修改
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_pitch_link"),
+            "asset_cfg": SceneEntityCfg("robot", body_names=".*_ankle_pitch_link"),
+        },
+    )
+    feet_air_time_asymmetry = RewTerm(
+        func=mdp.feet_air_time_asymmetry_penalty,
+        weight=-0.6,
+        params={
+            "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*_ankle_pitch_link"),
+            "max_penalty": 1.0,
         },
     )
 
@@ -57,9 +65,26 @@ class MyRobotRewards(RewardsCfg):
     joint_deviation_hip = RewTerm(
         func=mdp.joint_deviation_l1,
         weight=-0.1,
-        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_yaw_joint", ".*_leg_roll_joint"])},  # 修改
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_leg_roll_joint"])},
     )
-    # 删除：没有手臂、手指、torso关节
+
+
+    joint_deviation_knee = RewTerm(
+        func=mdp.joint_deviation_l1,
+        weight=-0.1,  # 可调
+        params={"asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_pitch_joint"])},
+    )
+    # # 膝关节限位惩罚（替代原来的 joint_deviation_knee）
+    # knee_pitch_soft_limit = RewTerm(
+    #     func=mdp.knee_pitch_soft_limit,
+    #     weight=-0.6,
+    #     params={
+    #         "asset_cfg": SceneEntityCfg("robot", joint_names=[".*_knee_pitch_joint"]),
+    #         "limit_deg": 20.0,
+    #         "max_penalty": 1.0,
+    #     },
+    # )
+
 
 
 @configclass
@@ -71,13 +96,13 @@ class MyRobotRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         super().__post_init__()
         # Scene
         self.scene.robot = MY_ROBOT_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
-        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"  # 修改：你的基座链接名
+        self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/base_link"
 
         # Randomization
         self.events.push_robot = None
         self.events.add_base_mass = None
         self.events.reset_robot_joints.params["position_range"] = (1.0, 1.0)
-        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]  # 修改
+        self.events.base_external_force_torque.params["asset_cfg"].body_names = ["base_link"]
         self.events.reset_base.params = {
             "pose_range": {"x": (-0.5, 0.5), "y": (-0.5, 0.5), "yaw": (-3.14, 3.14)},
             "velocity_range": {
@@ -96,22 +121,22 @@ class MyRobotRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         self.rewards.undesired_contacts = None
         self.rewards.flat_orientation_l2.weight = -1.0
         self.rewards.action_rate_l2.weight = -0.005
-        self.rewards.dof_acc_l2.weight = -1.25e-7
+        self.rewards.dof_acc_l2.weight = -1.25e-6
         self.rewards.dof_acc_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_leg_.*", ".*_knee_pitch_joint"]  # 修改
+            "robot", joint_names=[".*_leg_.*", ".*_knee_pitch_joint",".*_ankle_.*"]
         )
-        self.rewards.dof_torques_l2.weight = -1.5e-7
+        self.rewards.dof_torques_l2.weight = -1.5e-6
         self.rewards.dof_torques_l2.params["asset_cfg"] = SceneEntityCfg(
-            "robot", joint_names=[".*_leg_.*", ".*_knee_pitch_joint", ".*_ankle_.*"]  # 修改
+            "robot", joint_names=[".*_leg_.*", ".*_knee_pitch_joint", ".*_ankle_.*"]
         )
 
         # Commands
         self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)
         self.commands.base_velocity.ranges.lin_vel_y = (-0.0, 0.0)
-        self.commands.base_velocity.ranges.ang_vel_z = (-1.0, 1.0)
+        self.commands.base_velocity.ranges.ang_vel_z = (0.0, 0.0)
 
         # terminations
-        self.terminations.base_contact.params["sensor_cfg"].body_names = "base_link"  # 修改
+        self.terminations.base_contact.params["sensor_cfg"].body_names = "base_link"
 
 
 @configclass

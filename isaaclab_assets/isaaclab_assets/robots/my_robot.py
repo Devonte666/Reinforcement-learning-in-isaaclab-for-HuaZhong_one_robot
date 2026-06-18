@@ -14,9 +14,8 @@ from isaaclab.assets.articulation import ArticulationCfg
 # Configuration
 ##
 
-# USD 路径（使用绝对路径）
-MY_ROBOT_USD_PATH = r"D:\Devonte_file\Robot\Unitree\IsaacLab\source\isaaclab_assets\data\Robots\MyRobot\my_robot.usd"
-"""Path to the my_robot robot USD file."""
+# USD 路径（使用 isaaclab_assets scheme）
+MY_ROBOT_USD_PATH = "/home/user/Devonte_file/IsaacLab/source/isaaclab_assets/isaaclab_assets/data/Robots/MyRobot/my_robot.usd"
 
 
 MY_ROBOT_CFG = ArticulationCfg(
@@ -33,7 +32,7 @@ MY_ROBOT_CFG = ArticulationCfg(
             max_depenetration_velocity=1.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=False,
+            enabled_self_collisions=True,
             solver_position_iteration_count=8,
             solver_velocity_iteration_count=4,
         ),
@@ -42,13 +41,11 @@ MY_ROBOT_CFG = ArticulationCfg(
         pos=(0.0, 0.0, 1.15),
         rot=(1.0, 0.0, 0.0, 0.0),
         joint_pos={
-            "Left_leg_yaw_joint": 0.0,
             "Left_leg_roll_joint": 0.0,
             "Left_leg_pitch_joint": -0.3,
             "Left_knee_pitch_joint": 0.6,
             "Left_ankle_roll_joint": 0.0,
             "Left_ankle_pitch_joint": -0.3,
-            "Right_leg_yaw_joint": 0.0,
             "Right_leg_roll_joint": 0.0,
             "Right_leg_pitch_joint": -0.3,
             "Right_knee_pitch_joint": 0.6,
@@ -58,45 +55,40 @@ MY_ROBOT_CFG = ArticulationCfg(
         joint_vel={".*": 0.0},
     ),
     soft_joint_pos_limit_factor=0.9,
+
     actuators={
         "legs": DCMotorCfg(
             joint_names_expr=[
-                ".*_leg_yaw_joint",
                 ".*_leg_roll_joint",
                 ".*_leg_pitch_joint",
                 ".*_knee_pitch_joint",
             ],
             effort_limit={
-                ".*_leg_yaw_joint": 264.0,      # 88 * 3
-                ".*_leg_roll_joint": 264.0,       # 88 * 3
-                ".*_leg_pitch_joint": 264.0,    # 88 * 3
-                ".*_knee_pitch_joint": 417.0,   # 139 * 3
+                ".*_leg_roll_joint": 264.0,
+                ".*_leg_pitch_joint": 264.0,
+                ".*_knee_pitch_joint": 264.0,
             },
             velocity_limit={
-                ".*_leg_yaw_joint": 20.0,
                 ".*_leg_roll_joint": 20.0,
                 ".*_leg_pitch_joint": 20.0,
                 ".*_knee_pitch_joint": 20.0,
             },
             stiffness={
-                ".*_leg_yaw_joint": 100.0,
                 ".*_leg_roll_joint": 100.0,
                 ".*_leg_pitch_joint": 200.0,
-                ".*_knee_pitch_joint": 200.0,
+                ".*_knee_pitch_joint": 180.0,
             },
             damping={
-                ".*_leg_yaw_joint": 2.5,
                 ".*_leg_roll_joint": 2.5,
                 ".*_leg_pitch_joint": 2.5,
                 ".*_knee_pitch_joint": 5.0,
             },
             armature={
-                ".*_leg_yaw_joint": 0.03,
                 ".*_leg_roll_joint": 0.03,
                 ".*_leg_pitch_joint": 0.03,
                 ".*_knee_pitch_joint": 0.03,
             },
-            saturation_effort=540.0,  # 180 * 3
+            saturation_effort=540.0,
         ),
         "feet": DCMotorCfg(
             joint_names_expr=[
@@ -112,15 +104,15 @@ MY_ROBOT_CFG = ArticulationCfg(
                 ".*_ankle_pitch_joint": 0.2,
             },
             effort_limit={
-                ".*_ankle_roll_joint": 150.0,    # 50 * 3
-                ".*_ankle_pitch_joint": 150.0,   # 50 * 3
+                ".*_ankle_roll_joint": 150.0,
+                ".*_ankle_pitch_joint": 150.0,
             },
             velocity_limit={
                 ".*_ankle_roll_joint": 20.0,
                 ".*_ankle_pitch_joint": 20.0,
             },
             armature=0.03,
-            saturation_effort=240.0,  # 80 * 3
+            saturation_effort=240.0,
         ),
     },
     prim_path="/World/envs/env_.*/Robot",

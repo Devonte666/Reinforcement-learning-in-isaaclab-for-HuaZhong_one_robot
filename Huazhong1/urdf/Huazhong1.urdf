@@ -37,7 +37,6 @@
         <mesh filename="../meshes/Left_leg_yaw_link.STL" />
       </geometry>
     </visual>
-    <!-- 髋部电机碰撞体 -->
     <collision>
       <origin xyz="-0.02 0 -0.04" rpy="0 0 0" />
       <geometry>
@@ -46,12 +45,11 @@
     </collision>
   </link>
 
-  <joint name="Left_leg_yaw_joint" type="revolute">
+  <!-- 🔒 已改为 fixed -->
+  <joint name="Left_leg_yaw_joint" type="fixed">
     <origin xyz="-0.0017724 0.11756 -0.0305" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Left_leg_yaw_link" />
-    <axis xyz="0 0 1" />
-    <limit lower="-0.1745" upper="0.6981" effort="1000" velocity="20" />
   </joint>
 
   <link name="Left_leg_roll_link">
@@ -79,10 +77,9 @@
     <parent link="Left_leg_yaw_link" />
     <child link="Left_leg_roll_link" />
     <axis xyz="1 0 0" />
-    <limit lower="-0.5236" upper="0.5236" effort="1000" velocity="20" />
+    <limit lower="-0.0349" upper="0.5236" effort="1000" velocity="20" />
   </joint>
 
-  <!-- 左大腿 -->
   <link name="Left_leg_pitch_link">
     <inertial>
       <origin xyz="-0.008 0.004 -0.182" rpy="0 0 0" />
@@ -96,7 +93,6 @@
       </geometry>
     </visual>
     <collision>
-      <!-- 大腿长度约 0.39, 碰撞体中心放在 -0.19 -->
       <origin xyz="0 0 -0.19" rpy="0 0 0" />
       <geometry>
         <box size="0.12 0.12 0.35" />
@@ -112,7 +108,6 @@
     <limit lower="-1.6581" upper="0.2618" effort="1000" velocity="20" />
   </joint>
 
-  <!-- 左小腿 -->
   <link name="Left_knee_pitch_link">
     <inertial>
       <origin xyz="0.039 0.001 -0.146" rpy="0 0 0" />
@@ -126,10 +121,9 @@
       </geometry>
     </visual>
     <collision>
-      <!-- 小腿长度约 0.34, 碰撞体中心放在 -0.17 -->
-      <origin xyz="0.02 0 -0.17" rpy="0 0 0" />
+      <origin xyz="0.02 -0.03 -0.17" rpy="0 0 0" />
       <geometry>
-        <box size="0.08 0.08 0.3" />
+        <box size="0.10 0.10 0.3" />
       </geometry>
     </collision>
   </link>
@@ -139,7 +133,7 @@
     <parent link="Left_leg_pitch_link" />
     <child link="Left_knee_pitch_link" />
     <axis xyz="0 1 0" />
-    <limit lower="0.0873" upper="2.1817" effort="1000" velocity="20" />
+    <limit lower="0.0873" upper="1.7453" effort="1000" velocity="20" />
   </joint>
 
   <link name="Left_ankle_roll_link">
@@ -192,7 +186,7 @@
     <limit lower="-0.5236" upper="0.5236" effort="1000" velocity="20" />
   </joint>
 
-  <!-- ================= RIGHT LEG (Symmetric to Left) ================= -->
+  <!-- ================= RIGHT LEG ================= -->
   <link name="Right_leg_yaw_link">
     <inertial>
       <origin xyz="-0.027 0.000 -0.041" rpy="0 0 0" />
@@ -213,12 +207,11 @@
     </collision>
   </link>
 
-  <joint name="Right_leg_yaw_joint" type="revolute">
+  <!-- 🔒 已改为 fixed -->
+  <joint name="Right_leg_yaw_joint" type="fixed">
     <origin xyz="-0.0017724 -0.11744 -0.0305" rpy="0 0 0" />
     <parent link="base_link" />
     <child link="Right_leg_yaw_link" />
-    <axis xyz="0 0 1" />
-    <limit lower="-0.6981" upper="0.1745" effort="1000" velocity="20" />
   </joint>
 
   <link name="Right_leg_roll_link">
@@ -246,7 +239,7 @@
     <parent link="Right_leg_yaw_link" />
     <child link="Right_leg_roll_link" />
     <axis xyz="1 0 0" />
-    <limit lower="-0.5236" upper="0.5236" effort="1000" velocity="20" />
+    <limit lower="-0.5236" upper="0.0349" effort="1000" velocity="20" />
   </joint>
 
   <link name="Right_leg_pitch_link">
@@ -290,9 +283,9 @@
       </geometry>
     </visual>
     <collision>
-      <origin xyz="0.02 0 -0.17" rpy="0 0 0" />
+      <origin xyz="0.02 0.03 -0.17" rpy="0 0 0" />
       <geometry>
-        <box size="0.08 0.08 0.3" />
+        <box size="0.10 0.10 0.3" />
       </geometry>
     </collision>
   </link>
@@ -302,7 +295,7 @@
     <parent link="Right_leg_pitch_link" />
     <child link="Right_knee_pitch_link" />
     <axis xyz="0 1 0" />
-    <limit lower="0.0873" upper="2.1817" effort="1000" velocity="20" />
+    <limit lower="0.0873" upper="1.7453" effort="1000" velocity="20" />
   </joint>
 
   <link name="Right_ankle_roll_link">

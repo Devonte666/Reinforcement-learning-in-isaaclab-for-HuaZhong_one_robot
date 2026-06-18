@@ -30,6 +30,4 @@ from .shadow_hand import *
 from .spot import *
 from .unitree import *
 from .universal_robots import *
-"""Robots configurations."""
-
 from .my_robot import MY_ROBOT_CFG, MY_ROBOT_FIXED_BASE_CFG
