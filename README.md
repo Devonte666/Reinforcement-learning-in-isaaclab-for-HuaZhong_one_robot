@@ -1,4 +1,5 @@
 # MyRobot for Isaac Lab
+[录屏 2026年06月18日 18时23分50秒.webm](https://github.com/user-attachments/assets/be079582-ed04-4448-a441-844c02c66ea9)
 
 自定义机器人 MyRobot 在 Isaac Lab 中的训练配置。
 
