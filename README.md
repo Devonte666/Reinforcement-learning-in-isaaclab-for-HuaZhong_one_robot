@@ -17,6 +17,8 @@
 | `isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/__init__.py` | 修改：进入 velocity 任务发现层并加载 config |
 | `isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/config/__init__.py` | 修改：添加 `from . import my_robot` |
 | `isaaclab_assets/isaaclab_assets/robots/__init__.py` | 修改：添加 `my_robot` 导入 |
+| `MuJoCo/` | IsaacLab 训练策略迁移到 MuJoCo 的 sim-to-sim 验证脚本 |
+| `scripts/reinforcement_learning/rsl_rl/play_trace.py` | IsaacLab 侧 trace 导出脚本，用于和 MuJoCo 逐项对比 |
 
 ## 🛠️ 安装方式
 
@@ -48,6 +50,10 @@ cp isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/config/__init
   $ISAACLAB/source/isaaclab_tasks/isaaclab_tasks/manager_based/locomotion/velocity/config/
 cp isaaclab_assets/isaaclab_assets/robots/__init__.py \
   $ISAACLAB/source/isaaclab_assets/isaaclab_assets/robots/
+
+# 6. 可选：复制 sim-to-sim trace 调试脚本
+cp scripts/reinforcement_learning/rsl_rl/play_trace.py \
+  $ISAACLAB/scripts/reinforcement_learning/rsl_rl/
 ```
 
 ## 奖励与惩罚设计
@@ -115,3 +121,123 @@ cp isaaclab_assets/isaaclab_assets/robots/__init__.py \
 .\isaaclab.bat -p scripts\reinforcement_learning\rsl_rl\play.py `
   --task Isaac-Velocity-Flat-MyRobot-v0
 ```
+
+## MuJoCo Sim-to-Sim 验证
+
+本仓库同时包含 IsaacLab -> MuJoCo 的 sim-to-sim 验证代码，位于 `MuJoCo/`。
+
+### 文件说明
+
+| 路径 | 说明 |
+|------|------|
+| `MuJoCo/run_policy_mujoco.py` | 在 MuJoCo 中加载 IsaacLab 导出的 ONNX policy 并运行机器人 |
+| `MuJoCo/compare_traces.py` | 对比 IsaacLab trace 和 MuJoCo trace，定位 observation/action/dynamics 差异 |
+| `MuJoCo/convert_stl.py` | 辅助转换 STL mesh |
+| `MuJoCo/screenshot.png` | MuJoCo 当前模型显示参考图 |
+| `Huazhong1/urdf/Huazhong1.xml` | 由 URDF 转换得到的 MJCF 模型 |
+
+### 运行方式
+
+先导出 IsaacLab policy 为 ONNX，然后在 MuJoCo 环境中运行：
+
+```bash
+conda activate mujoco_rl
+cd /home/user/Devonte_file/Reinforcement-learning-in-isaaclab-for-HuaZhong_one_robot/MuJoCo
+
+python run_policy_mujoco.py \
+  --mjcf_path /home/user/Devonte_file/Reinforcement-learning-in-isaaclab-for-HuaZhong_one_robot/Huazhong1/urdf/Huazhong1.xml \
+  --onnx_path /home/user/Devonte_file/IsaacLab/logs/rsl_rl/my_robot_flat/2026-06-18_15-46-24/exported/policy.onnx \
+  --command_vel 1.0 0.0 0.0
+```
+
+当前验证通过的 policy 输入为 42 维：
+
+```text
+base_lin_vel       3
+base_ang_vel       3
+projected_gravity  3
+velocity_commands  3
+joint_pos          10
+joint_vel          10
+last_action        10
+```
+
+policy 输出不是直接力矩，而是 10 维关节位置 action：
+
+```text
+target_joint_pos = default_joint_pos + 0.5 * action
+```
+
+底层再由 PD/DCMotor actuator 根据 `kp/kd` 计算关节力矩。
+
+### 本次迁移做了什么
+
+1. 将 `Huazhong1.urdf` 转换为 MuJoCo MJCF：`Huazhong1/urdf/Huazhong1.xml`。
+2. 编写 `run_policy_mujoco.py`，完成 MJCF 加载、ONNX policy 加载、42 维 observation 构造、action 执行和 viewer/headless 运行。
+3. 编写 `play_trace.py` 和 `compare_traces.py`，用于把 IsaacLab 前几秒的 observation/action/dynamics 导出并和 MuJoCo 逐项对比。
+4. 修正 MuJoCo 中的关节顺序，使其与 IsaacLab action term 顺序一致。
+5. 增加 actuator 到 joint 的显式映射，避免 MuJoCo XML actuator 顺序和 policy joint 顺序不一致。
+6. 修正默认关节角、action scale、PD 参数、control dt，使 MuJoCo 执行逻辑和 IsaacLab 对齐。
+7. 在 MJCF 里补充/调整 armature 和可视化 mesh，使模型显示和动力学表现更接近 IsaacLab。
+
+### 遇到的问题和解决方式
+
+| 问题 | 原因 | 解决方式 |
+|------|------|----------|
+| MuJoCo 中机器人很快倒地 | policy action 顺序和 MuJoCo joint 顺序不一致 | 使用 IsaacLab trace metadata 确认真实 joint order，并重排 `JOINT_NAMES` |
+| action/target 对不上 | MuJoCo actuator 顺序不能假设等于 joint 顺序 | 根据 `model.actuator_trnid` 建立 actuator 到 joint 的映射 |
+| 模型只显示碰撞块或视觉效果和 URDF 不同 | MJCF 转换后 mesh/visual 路径和 MuJoCo 显示方式不同 | 检查 MJCF mesh 路径，补充 `base_link.obj` 并保留必要 visual/collision |
+| Ctrl+C 不容易退出 viewer | MuJoCo viewer 主循环没有处理 stop signal | 在脚本中加入 `SIGINT/SIGTERM` stop flag 和 clean shutdown |
+| 运行结束后出现 `GLXBadContext` | viewer 关闭时 OpenGL context 释放警告 | 仿真已完成后出现，不影响结果 |
+| `fetch first` 导致 Git push 被拒绝 | GitHub 远端已有本地没有的新提交 | 先 `git fetch origin`，再 `git rebase origin/main`，最后重新 push |
+
+### Trace 对比流程
+
+在 IsaacLab 里导出 trace：
+
+```bash
+conda activate env_isaaclab
+cd /home/user/Devonte_file/IsaacLab
+
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play_trace.py \
+  --task Isaac-Velocity-Flat-MyRobot-Play-v0 \
+  --num_envs 1 \
+  --checkpoint /home/user/Devonte_file/IsaacLab/logs/rsl_rl/my_robot_flat/2026-06-18_15-46-24/model_1499.pt \
+  --headless \
+  --trace_path /home/user/Devonte_file/isaaclab_dynamics_trace.csv \
+  --trace_steps 100
+```
+
+在 MuJoCo 中重放 IsaacLab action：
+
+```bash
+conda activate mujoco_rl
+cd /home/user/Devonte_file/Reinforcement-learning-in-isaaclab-for-HuaZhong_one_robot/MuJoCo
+
+python run_policy_mujoco.py \
+  --headless \
+  --control_mode position \
+  --replay_trace /home/user/Devonte_file/isaaclab_dynamics_trace.csv \
+  --trace_path /home/user/Devonte_file/mujoco_position_replay_trace.csv \
+  --trace_steps 100 \
+  --duration 2.1
+```
+
+对比两边 trace：
+
+```bash
+python compare_traces.py \
+  --isaac /home/user/Devonte_file/isaaclab_dynamics_trace.csv \
+  --mujoco /home/user/Devonte_file/mujoco_position_replay_trace.csv
+```
+
+### 后续迁移注意事项
+
+- observation 顺序必须和训练时完全一致，尤其是 `joint_pos`、`joint_vel`、`last_action` 的关节顺序。
+- action 顺序必须和 IsaacLab action term 顺序一致，不能只按 URDF/MJCF 文件里的顺序猜。
+- `default_joint_pos`、`ACTION_SCALE`、`CONTROL_DT`、`kp/kd`、effort limit 要和 IsaacLab 配置保持一致。
+- `velocity_commands` 是目标速度命令，不是机器人当前速度。
+- `projected_gravity` 应由 IMU 姿态估计得到，用来表示机身相对重力方向的姿态。
+- 当前 policy 不使用脚踝六维力传感器；如果未来加入双脚 6D wrench，输入会从 42 维变为 54 维，需要重新训练或 fine-tune。
+- 真机部署时应优先保证零位、关节方向、单位、坐标系、延迟和滤波与仿真一致。
+- MuJoCo 中能跑通只说明 sim-to-sim 链路成立，真机部署仍需要低速、限幅、急停和安全绳等保护。
