@@ -1,0 +1,144 @@
+<mujoco model="Huazhong1">
+  <compiler angle="radian" meshdir="../meshes" autolimits="true"/>
+
+  <option timestep="0.002" integrator="RK4">
+    <flag warmstart="enable"/>
+  </option>
+
+  <!-- 资产定义 -->
+  <asset>
+    <texture name="groundplane" type="2d" builtin="checker" width="512" height="512"
+             rgb1="0.25 0.25 0.25" rgb2="0.35 0.35 0.35"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="8 8"/>
+    <mesh name="base_link_mesh" file="base_link.obj"/>
+    <mesh name="Left_leg_yaw_link_mesh" file="Left_leg_yaw_link.STL"/>
+    <mesh name="Left_leg_roll_link_mesh" file="Left_leg_roll_link.STL"/>
+    <mesh name="Left_leg_pitch_link_mesh" file="Left_leg_pitch_link.STL"/>
+    <mesh name="Left_knee_pitch_link_mesh" file="Left_knee_pitch_link.STL"/>
+    <mesh name="Left_ankle_roll_link_mesh" file="Left_ankle_roll_link.STL"/>
+    <mesh name="Left_ankle_pitch_link_mesh" file="Left_ankle_pitch_link.STL"/>
+    <mesh name="Right_leg_yaw_link_mesh" file="Right_leg_yaw_link.STL"/>
+    <mesh name="Right_leg_roll_link_mesh" file="Right_leg_roll_link.STL"/>
+    <mesh name="Right_leg_pitch_link_mesh" file="Right_leg_pitch_link.STL"/>
+    <mesh name="Right_knee_pitch_link_mesh" file="Right_knee_pitch_link.STL"/>
+    <mesh name="Right_ankle_roll_link_mesh" file="Right_ankle_roll_link.STL"/>
+    <mesh name="Right_ankle_pitch_link_mesh" file="Right_ankle_pitch_link.STL"/>
+  </asset>
+
+  <!-- 执行器 -->
+  <actuator>
+    <position joint="Left_leg_roll_joint" kp="100" kv="2.5" forcerange="-264 264"/>
+    <position joint="Left_leg_pitch_joint" kp="200" kv="2.5" forcerange="-264 264"/>
+    <position joint="Left_knee_pitch_joint" kp="180" kv="5.0" forcerange="-264 264"/>
+    <position joint="Left_ankle_roll_joint" kp="20" kv="0.2" forcerange="-150 150"/>
+    <position joint="Left_ankle_pitch_joint" kp="20" kv="0.2" forcerange="-150 150"/>
+    <position joint="Right_leg_roll_joint" kp="100" kv="2.5" forcerange="-264 264"/>
+    <position joint="Right_leg_pitch_joint" kp="200" kv="2.5" forcerange="-264 264"/>
+    <position joint="Right_knee_pitch_joint" kp="180" kv="5.0" forcerange="-264 264"/>
+    <position joint="Right_ankle_roll_joint" kp="20" kv="0.2" forcerange="-150 150"/>
+    <position joint="Right_ankle_pitch_joint" kp="20" kv="0.2" forcerange="-150 150"/>
+  </actuator>
+
+  <worldbody>
+    <!-- 地面 -->
+    <geom name="floor" size="50 50 0.1" type="plane" material="groundplane"/>
+
+    <!-- 根 body：自由浮动基座 -->
+    <body name="base_link" pos="0 0 1.15">
+      <freejoint name="root"/>
+      
+      <!-- Base inertia matches the IsaacLab USD after fixed yaw links are merged. -->
+      <inertial pos="-0.0076529738 0.000004355215 0.23037302" mass="57.5009346"
+                diaginertia="2.3499134 2.1122737 0.9100302"
+                quat="0.99980676 -0.0011714211 -0.018227587 -0.0072723455"/>
+      <!-- 视觉 -->
+      <geom name="base_visual" type="mesh" mesh="base_link_mesh" rgba="0.75294 0.75294 0.75294 1" contype="0" conaffinity="0" group="1"/>
+      <!-- 碰撞 -->
+      <geom name="base_collision" size="0.15 0.15 0.275" pos="0 0 0.275" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+      <geom name="Left_leg_yaw_visual" type="mesh" mesh="Left_leg_yaw_link_mesh" pos="-0.0017724 0.11756 -0.0305" contype="0" conaffinity="0" group="1"/>
+      <geom name="Left_leg_yaw_collision" size="0.04 0.04 0.04" pos="-0.0217724 0.11756 -0.0705" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+      <geom name="Right_leg_yaw_visual" type="mesh" mesh="Right_leg_yaw_link_mesh" pos="-0.0017724 -0.11744 -0.0305" contype="0" conaffinity="0" group="1"/>
+      <geom name="Right_leg_yaw_collision" size="0.04 0.04 0.04" pos="-0.0217724 -0.11744 -0.0705" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+
+      <!-- ================= LEFT LEG ================= -->
+      <body name="Left_leg_roll_link" pos="-0.0017724 0.11756 -0.109500006">
+          <inertial pos="0.003 0.000 -0.004" mass="1.32126"
+                    fullinertia="0.002222 0.003334 0.003334 0.0 0.0 0.0"/>
+          <geom name="Left_leg_roll_visual" type="mesh" mesh="Left_leg_roll_link_mesh" contype="0" conaffinity="0" group="1"/>
+          <geom name="Left_leg_roll_collision" size="0.03 0.03 0.03" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+          <joint name="Left_leg_roll_joint" pos="0 0 0" axis="1 0 0" range="-0.0349 0.5236" armature="0.03"/>
+
+          <body name="Left_leg_pitch_link" pos="3.1428e-05 0.00025494 -0.073014">
+            <inertial pos="-0.008 0.004 -0.182" mass="7.714204"
+                      fullinertia="0.11668 0.115569 0.022225 0.0 -0.002222 0.0"/>
+            <geom name="Left_leg_pitch_visual" type="mesh" mesh="Left_leg_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+            <geom name="Left_leg_pitch_collision" size="0.06 0.06 0.175" pos="0 0 -0.19" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+            <joint name="Left_leg_pitch_joint" pos="0 0 0" axis="0 1 0" range="-1.6581 0.2618" armature="0.03"/>
+
+            <body name="Left_knee_pitch_link" pos="0 -1.0982e-05 -0.38999">
+              <inertial pos="0.039 0.001 -0.146" mass="4.738313"
+                        fullinertia="0.040005 0.041116 0.01778 0.0 0.004445 0.0"/>
+              <geom name="Left_knee_pitch_visual" type="mesh" mesh="Left_knee_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+              <geom name="Left_knee_pitch_collision" size="0.05 0.05 0.15" pos="0.02 -0.03 -0.17" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+              <joint name="Left_knee_pitch_joint" pos="0 0 0" axis="0 1 0" range="0.0873 1.7453" armature="0.03"/>
+
+              <body name="Left_ankle_roll_link" pos="-3.4425e-05 -0.00024396 -0.34">
+                <inertial pos="-0.001 -0.001 0.000" mass="0.137793"
+                          fullinertia="0.0001 0.0001 0.0001 0.0 0.0 0.0"/>
+                <geom name="Left_ankle_roll_visual" type="mesh" mesh="Left_ankle_roll_link_mesh" contype="0" conaffinity="0" group="1"/>
+                <joint name="Left_ankle_roll_joint" pos="0 0 0" axis="1 0 0" range="-0.6981 0.4363" armature="0.03"/>
+
+                <body name="Left_ankle_pitch_link">
+                  <inertial pos="0.040 0.000 -0.076" mass="1.637963"
+                            fullinertia="0.003334 0.007779 0.00889 0.0 0.0 0.0"/>
+                  <geom name="Left_ankle_pitch_visual" type="mesh" mesh="Left_ankle_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+                  <geom name="Left_ankle_pitch_collision" size="0.125 0.08 0.01" pos="0.05 0 -0.095" type="box" rgba="0.2 0.2 0.8 0.5" group="3"/>
+                  <joint name="Left_ankle_pitch_joint" pos="0 0 0" axis="0 1 0" range="-0.5236 0.5236" armature="0.03"/>
+                </body>
+              </body>
+            </body>
+          </body>
+      </body>
+
+      <!-- ================= RIGHT LEG ================= -->
+      <body name="Right_leg_roll_link" pos="-0.0017724 -0.11744 -0.109500006">
+          <inertial pos="0.003 0.000 -0.004" mass="1.32126"
+                    fullinertia="0.002222 0.003334 0.003334 0.0 0.0 0.0"/>
+          <geom name="Right_leg_roll_visual" type="mesh" mesh="Right_leg_roll_link_mesh" contype="0" conaffinity="0" group="1"/>
+          <geom name="Right_leg_roll_collision" size="0.03 0.03 0.03" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+          <joint name="Right_leg_roll_joint" pos="0 0 0" axis="1 0 0" range="-0.5236 0.0349" armature="0.03"/>
+
+          <body name="Right_leg_pitch_link" pos="3.1428e-05 0.00025494 -0.073014">
+            <inertial pos="-0.008 0.004 -0.182" mass="7.714204"
+                      fullinertia="0.11668 0.114457 0.022225 0.0 -0.002222 0.0"/>
+            <geom name="Right_leg_pitch_visual" type="mesh" mesh="Right_leg_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+            <geom name="Right_leg_pitch_collision" size="0.06 0.06 0.175" pos="0 0 -0.19" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+            <joint name="Right_leg_pitch_joint" pos="0 0 0" axis="0 1 0" range="-1.6581 0.2618" armature="0.03"/>
+
+            <body name="Right_knee_pitch_link" pos="0 -1.0982e-05 -0.38999">
+              <inertial pos="0.041 0.000 -0.144" mass="4.738313"
+                        fullinertia="0.037782 0.040005 0.018891 0.0 0.004445 -0.001111"/>
+              <geom name="Right_knee_pitch_visual" type="mesh" mesh="Right_knee_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+              <geom name="Right_knee_pitch_collision" size="0.05 0.05 0.15" pos="0.02 0.03 -0.17" type="box" rgba="0.5 0.5 0.5 0.3" group="3"/>
+              <joint name="Right_knee_pitch_joint" pos="0 0 0" axis="0 1 0" range="0.0873 1.7453" armature="0.03"/>
+
+              <body name="Right_ankle_roll_link" pos="-3.4425e-05 -0.00024396 -0.34">
+                <inertial pos="-0.001 -0.001 0.000" mass="0.137793"
+                          fullinertia="0.0001 0.0001 0.0001 0.0 0.0 0.0"/>
+                <geom name="Right_ankle_roll_visual" type="mesh" mesh="Right_ankle_roll_link_mesh" contype="0" conaffinity="0" group="1"/>
+                <joint name="Right_ankle_roll_joint" pos="0 0 0" axis="1 0 0" range="-0.6981 0.4363" armature="0.03"/>
+
+                <body name="Right_ankle_pitch_link">
+                  <inertial pos="0.040 0.000 -0.076" mass="1.637963"
+                            fullinertia="0.003334 0.007779 0.00889 0.0 0.0 0.0"/>
+                  <geom name="Right_ankle_pitch_visual" type="mesh" mesh="Right_ankle_pitch_link_mesh" contype="0" conaffinity="0" group="1"/>
+                  <geom name="Right_ankle_pitch_collision" size="0.125 0.08 0.01" pos="0.05 0 -0.095" type="box" rgba="0.8 0.2 0.2 0.5" group="3"/>
+                  <joint name="Right_ankle_pitch_joint" pos="0 0 0" axis="0 1 0" range="-0.5236 0.5236" armature="0.03"/>
+                </body>
+              </body>
+            </body>
+          </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

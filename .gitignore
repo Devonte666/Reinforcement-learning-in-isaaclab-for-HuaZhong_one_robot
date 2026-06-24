@@ -1,8 +1,6 @@
-@'
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 *.so
 .Python
 
@@ -21,4 +19,3 @@ Thumbs.db
 *.tmp.usda
 *.tmp.usdc
 logs/
-'@ | Set-Content -Encoding UTF8 .gitignore
