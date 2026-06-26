@@ -120,7 +120,11 @@ cp scripts/reinforcement_learning/rsl_rl/play_trace.py \
 # 加载训练好的模型进行测试
 .\isaaclab.bat -p scripts\reinforcement_learning\rsl_rl\play.py `
   --task Isaac-Velocity-Flat-MyRobot-v0
+
+./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
+  --task Isaac-Velocity-Flat-MyRobot-v0
 ```
+
 
 ## MuJoCo Sim-to-Sim 验证
 
