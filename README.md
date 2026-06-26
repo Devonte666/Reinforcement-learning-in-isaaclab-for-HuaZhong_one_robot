@@ -235,6 +235,16 @@ python compare_traces.py \
   --mujoco /home/user/Devonte_file/mujoco_position_replay_trace.csv
 ```
 
+播放策略命令
+
+```bash
+conda activate mujoco_rl
+cd /home/user/Devonte_file/MuJoCo
+
+python run_policy_mujoco.py
+
+```
+
 ### 后续迁移注意事项
 
 - observation 顺序必须和训练时完全一致，尤其是 `joint_pos`、`joint_vel`、`last_action` 的关节顺序。
