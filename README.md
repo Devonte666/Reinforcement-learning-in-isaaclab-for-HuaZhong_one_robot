@@ -113,6 +113,15 @@ cp scripts/reinforcement_learning/rsl_rl/play_trace.py \
   --task Isaac-Velocity-Flat-MyRobot-v0 `
   --num_envs 2048 `
   --headless
+
+python scripts/rsl_rl/train.py \
+  --task HuaZhong-Velocity-Flat-MyRobot-v2 \
+  --num_envs 4096 \
+  --device cuda:0 \
+  --headless \
+  --max_iterations 1500
+
+  --run_name standing_reward_test
 ```
 
 ## 🎮 播放/测试命令
