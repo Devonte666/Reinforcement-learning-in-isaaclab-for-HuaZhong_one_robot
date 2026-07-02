@@ -114,12 +114,15 @@ cp scripts/reinforcement_learning/rsl_rl/play_trace.py \
   --num_envs 2048 `
   --headless
 
+
+conda activate env_isaaclab
+cd /home/user/Devonte_file/huazhong_isaaclab
+
 python scripts/rsl_rl/train.py \
   --task HuaZhong-Velocity-Flat-MyRobot-v2 \
   --num_envs 4096 \
   --device cuda:0 \
   --headless \
-  --max_iterations 1500
 
   --run_name standing_reward_test
 ```
