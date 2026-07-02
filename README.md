@@ -252,6 +252,15 @@ cd /home/user/Devonte_file/MuJoCo
 
 python run_policy_mujoco.py
 
+六维力观测减半时
+python run_policy_mujoco_v2.py \
+  --onnx_path /home/user/Devonte_file/huazhong_isaaclab/logs/rsl_rl/my_robot_force_obs_flat/2026-07-02_17-49-54/exported/policy.onnx \
+  --ankle_wrench_mode subtree \
+  --wrench_obs_gain 0.5 \
+  --command_vel 0.5 0.0 0.0 \
+  --duration 6 \
+  --trace_path /home/user/Devonte_file/mujoco_clip_wrench_gain_0p5.csv \
+  --trace_steps 600
 ```
 
 ### 后续迁移注意事项
