@@ -135,6 +135,18 @@ python scripts/rsl_rl/train.py \
 
 ./isaaclab.sh -p scripts/reinforcement_learning/rsl_rl/play.py \
   --task Isaac-Velocity-Flat-MyRobot-v0
+
+python scripts/reinforcement_learning/rsl_rl/play_command_schedule.py \
+  --task Isaac-Velocity-Flat-MyRobot-Play-v0 \
+  --num_envs 1 \
+  --device cuda:0 \
+  --checkpoint /home/user/Devonte_file/IsaacLab/logs/rsl_rl/my_robot_flat/2026-07-03_11-25-13/model_1099.pt \
+  --stand_time 5.0 \
+  --ramp_up_time 2.0 \
+  --walk_time 10.0 \
+  --ramp_down_time 2.0 \
+  --target_vx 0.8 \
+  --real-time
 ```
 
 
